@@ -34,9 +34,9 @@ Evite iniciar este servidor com `cmd /c start`; o Windows Defender pode marcar e
 ## Publicar no Firebase Hosting
 
 1. Copie `.firebaserc.example` para `.firebaserc`.
-2. Troque `seu-projeto-gcp` pelo ID do projeto.
+2. Confirme que o projeto esta como `terreiro360`.
 3. Rode `firebase login`.
-4. Defina `$env:FIREBASE_PROJECT_ID="seu-projeto-gcp"`.
+4. Defina `$env:FIREBASE_PROJECT_ID="terreiro360"`.
 5. Rode `.\scripts\deploy-firebase.ps1`.
 
 As regras iniciais do Firestore estao em `firestore.rules`.

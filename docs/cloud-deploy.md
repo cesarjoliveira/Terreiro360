@@ -4,8 +4,8 @@
 
 Depois do deploy, o app ficara disponivel nos dominios gerados pelo Firebase Hosting:
 
-- `https://PROJECT_ID.web.app`
-- `https://PROJECT_ID.firebaseapp.com`
+- `https://terreiro360.web.app`
+- `https://terreiro360.firebaseapp.com`
 
 Esses enderecos ja usam HTTPS e servem bem para o MVP antes de comprar ou conectar um dominio proprio.
 
@@ -23,11 +23,11 @@ Esses enderecos ja usam HTTPS e servem bem para o MVP antes de comprar ou conect
 1. Instalar Firebase CLI.
 2. Rodar `firebase login`.
 3. Copiar `.firebaserc.example` para `.firebaserc`.
-4. Trocar `seu-projeto-gcp` pelo ID real do projeto.
+4. Confirmar que o projeto esta como `terreiro360`.
 5. Definir a variavel do projeto:
 
 ```powershell
-$env:FIREBASE_PROJECT_ID="seu-projeto-gcp"
+$env:FIREBASE_PROJECT_ID="terreiro360"
 ```
 
 ## Deploy
@@ -38,7 +38,7 @@ $env:FIREBASE_PROJECT_ID="seu-projeto-gcp"
 
 ## Validacao
 
-1. Abrir `https://PROJECT_ID.web.app`.
+1. Abrir `https://terreiro360.web.app`.
 2. Confirmar que painel, filhos, mensalidades, contas, produtos e vendas carregam.
 3. Confirmar no Firebase Console que `firestore.rules` foi publicado.
 4. Criar os primeiros usuarios no Authentication.
