@@ -54,7 +54,7 @@ Para MVP:
 - Authentication sem telefone aparece com 50K usuarios ativos mensais sem custo; login por SMS e cobrado por SMS.
 - Firestore Standard tem cota gratuita de 1 GiB armazenado, 50K leituras/dia, 20K escritas/dia, 20K deletes/dia e 10 GiB/mes de saida.
 - Cloud Functions so deve entrar quando houver automacoes reais; ha cota gratuita mensal, mas build, logs, rede e artefatos podem gerar custo.
-- Orçamento: crie alerta mensal baixo, por exemplo R$ 25, R$ 50 e R$ 100.
+- Orçamento: crie alerta mensal baixo, por exemplo EUR 5, EUR 10 e EUR 25.
 
 ## Proximos passos tecnicos
 

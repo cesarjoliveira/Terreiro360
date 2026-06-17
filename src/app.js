@@ -37,7 +37,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const currency = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" });
 const today = new Date().toISOString().slice(0, 10);
 const appRoot = document.querySelector("#app");
 
