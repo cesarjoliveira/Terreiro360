@@ -6,21 +6,53 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return signedIn() && request.auth.token.role == "admin";
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
     }
 
-    function ownsChildProfile(childId) {
-      return signedIn() && request.auth.uid == childId;
+    function isAdmin() {
+      return signedIn()
+        && exists(userPath(request.auth.uid))
+        && get(userPath(request.auth.uid)).data.role == "admin"
+        && get(userPath(request.auth.uid)).data.status == "active";
+    }
+
+    function bootstrapAllowed() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/config/bootstrap)
+        && get(/databases/$(database)/documents/config/bootstrap).data.enabled == true
+        && request.resource.data.bootstrapCode == get(/databases/$(database)/documents/config/bootstrap).data.code
+        && request.resource.data.role == "admin";
+    }
+
+    function ownsChild(childId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/children/$(childId))
+        && get(/databases/$(database)/documents/children/$(childId)).data.userId == request.auth.uid;
+    }
+
+    match /config/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == userId);
+      allow create: if isAdmin() || (signedIn() && request.auth.uid == userId && bootstrapAllowed());
+      allow update: if isAdmin() || (
+        signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["displayName", "phone", "updatedAt"])
+      );
+      allow delete: if isAdmin();
     }
 
     match /children/{childId} {
-      allow read: if isAdmin() || ownsChildProfile(childId);
+      allow read: if isAdmin() || ownsChild(childId);
       allow create, update, delete: if isAdmin();
     }
 
     match /dues/{dueId} {
-      allow read: if isAdmin() || resource.data.childId == request.auth.uid;
+      allow read: if isAdmin() || ownsChild(resource.data.childId);
       allow write: if isAdmin();
     }
 

@@ -41,3 +41,9 @@ Evite iniciar este servidor com `cmd /c start`; o Windows Defender pode marcar e
 
 As regras iniciais do Firestore estao em `firestore.rules`.
 O guia completo esta em `docs/cloud-deploy.md`.
+
+## Primeiro administrador
+
+O app publicado esta em `https://terreiro360.web.app`.
+
+Para ativar a primeira conta de administrador, veja `docs/first-admin.md`.
