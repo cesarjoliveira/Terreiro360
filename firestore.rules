@@ -1,0 +1,48 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && request.auth.token.role == "admin";
+    }
+
+    function ownsChildProfile(childId) {
+      return signedIn() && request.auth.uid == childId;
+    }
+
+    match /children/{childId} {
+      allow read: if isAdmin() || ownsChildProfile(childId);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /dues/{dueId} {
+      allow read: if isAdmin() || resource.data.childId == request.auth.uid;
+      allow write: if isAdmin();
+    }
+
+    match /payables/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /receivables/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /products/{docId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /sales/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

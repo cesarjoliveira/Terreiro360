@@ -1,0 +1,19 @@
+{
+  "name": "terreiro360",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema web responsivo para gestao de terreiro.",
+  "scripts": {
+    "start": "node server.js",
+    "validate": "node scripts/validate.js",
+    "smoke": "node scripts/smoke-server.js"
+  },
+  "keywords": [
+    "terreiro",
+    "gestao",
+    "web",
+    "gcp"
+  ],
+  "author": "",
+  "license": "UNLICENSED"
+}
