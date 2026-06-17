@@ -12,7 +12,6 @@ import {
   addDoc,
   collection,
   deleteDoc,
-  deleteField,
   doc,
   getDoc,
   getFirestore,
@@ -208,8 +207,8 @@ function render() {
 
   if (!state.profile) {
     appRoot.className = "auth-root";
-    appRoot.innerHTML = renderBootstrap();
-    bindBootstrap();
+    appRoot.innerHTML = renderCompleteProfile();
+    bindCompleteProfile();
     return;
   }
 
@@ -248,31 +247,30 @@ function renderAuth() {
           <button class="link-button" type="button" data-reset-password>Redefinir senha</button>
         </form>
         <div class="auth-divider"></div>
-        <h2>Primeiro acesso</h2>
-        <form data-form="signup-admin" class="stack">
-          ${input("displayName", "Nome do administrador", "text", true)}
-          ${input("email", "E-mail do administrador", "email", true)}
+        <h2>Criar usuário</h2>
+        <form data-form="signup-user" class="stack">
+          ${input("displayName", "Nome", "text", true)}
+          ${input("email", "E-mail", "email", true)}
           ${input("password", "Senha", "password", true)}
-          ${input("code", "Código de implantação", "password", true)}
-          <button class="secondary wide-button" type="submit">${icon("plus")}Criar primeiro admin</button>
+          <button class="secondary wide-button" type="submit">${icon("plus")}Criar usuário</button>
         </form>
       </section>
     </main>
   `;
 }
 
-function renderBootstrap() {
+function renderCompleteProfile() {
   return `
     <main class="auth-screen">
       <section class="auth-card">
         <span class="brand-mark">T</span>
-        <h1>Primeiro administrador</h1>
-        <p>Informe o código de implantação para ativar sua conta como administrador.</p>
+        <h1>Completar cadastro</h1>
+        <p>Finalize seu cadastro para acessar a área de usuário.</p>
         ${notice()}
-        <form data-form="bootstrap" class="stack">
+        <form data-form="complete-profile" class="stack">
           ${input("displayName", "Nome", "text", true, auth.currentUser.displayName || "")}
-          ${input("code", "Código de implantação", "password", true)}
-          <button class="primary" type="submit">${icon("save")}Ativar admin</button>
+          ${input("phone", "Telefone", "tel")}
+          <button class="primary" type="submit">${icon("save")}Salvar cadastro</button>
           <button class="link-button" type="button" data-logout>Sair</button>
         </form>
       </section>
@@ -525,7 +523,10 @@ function renderUsers() {
       <td><strong>${escapeText(user.displayName)}</strong><small>${escapeText(user.email)}</small></td>
       <td><span class="status ${user.role === "admin" ? "paid" : "pending"}">${user.role === "admin" ? "Admin" : "Filho"}</span></td>
       <td><span class="status ${user.status}">${user.status === "active" ? "Ativo" : "Inativo"}</span></td>
-      <td><button class="mini" data-toggle-user="${user.id}">${user.status === "active" ? "Inativar" : "Ativar"}</button></td>
+      <td class="actions-cell">
+        <button class="mini" data-toggle-user-role="${user.id}">${user.role === "admin" ? "Tornar filho" : "Tornar admin"}</button>
+        <button class="mini" data-toggle-user="${user.id}">${user.status === "active" ? "Inativar" : "Ativar"}</button>
+      </td>
     </tr>
   `).join("");
   return `
@@ -542,7 +543,7 @@ function renderUsers() {
       </article>
       <article class="panel table-panel">
         <div class="panel-head"><h2>Usuários</h2><span>${state.users.length} logins</span></div>
-        ${table(["Usuário", "Perfil", "Status", ""], rows)}
+        ${table(["Usuário", "Perfil", "Status", "Ações"], rows)}
       </article>
     </section>
   `;
@@ -566,7 +567,7 @@ function bindAuth() {
     const data = formData(event);
     await runAction(() => signInWithEmailAndPassword(auth, data.email, data.password));
   });
-  document.querySelector('[data-form="signup-admin"]')?.addEventListener("submit", async (event) => {
+  document.querySelector('[data-form="signup-user"]')?.addEventListener("submit", async (event) => {
     const data = formData(event);
     await runAction(async () => {
       const credential = await createUserWithEmailAndPassword(auth, data.email, data.password);
@@ -574,15 +575,12 @@ function bindAuth() {
       await setDoc(doc(db, "users", credential.user.uid), {
         displayName: data.displayName,
         email: data.email,
-        role: "admin",
+        role: "basic",
         status: "active",
-        bootstrapCode: data.code,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      await updateDoc(doc(db, "users", credential.user.uid), { bootstrapCode: deleteField() });
-      await updateDoc(doc(db, "config", "bootstrap"), { enabled: false, usedAt: serverTimestamp(), usedBy: credential.user.uid });
-      state.notice = "Administrador criado.";
+      state.notice = "Usuário criado.";
       await loadCurrentProfile();
     });
   });
@@ -600,23 +598,21 @@ function bindAuth() {
   });
 }
 
-function bindBootstrap() {
-  document.querySelector('[data-form="bootstrap"]')?.addEventListener("submit", async (event) => {
+function bindCompleteProfile() {
+  document.querySelector('[data-form="complete-profile"]')?.addEventListener("submit", async (event) => {
     const data = formData(event);
     await runAction(async () => {
       await updateProfile(auth.currentUser, { displayName: data.displayName });
       await setDoc(doc(db, "users", auth.currentUser.uid), {
         displayName: data.displayName,
         email: auth.currentUser.email,
-        role: "admin",
+        phone: data.phone,
+        role: "basic",
         status: "active",
-        bootstrapCode: data.code,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      await updateDoc(doc(db, "users", auth.currentUser.uid), { bootstrapCode: deleteField() });
-      await updateDoc(doc(db, "config", "bootstrap"), { enabled: false, usedAt: serverTimestamp(), usedBy: auth.currentUser.uid });
-      state.notice = "Administrador ativado.";
+      state.notice = "Cadastro criado.";
       await loadCurrentProfile();
     });
   });
@@ -658,6 +654,10 @@ function bindForms() {
   document.querySelectorAll("[data-toggle-user]").forEach((button) => button.addEventListener("click", async () => {
     const user = state.users.find((item) => item.id === button.dataset.toggleUser);
     await runAction(() => updateDoc(doc(db, "users", user.id), stamp({ status: user.status === "active" ? "inactive" : "active" })));
+  }));
+  document.querySelectorAll("[data-toggle-user-role]").forEach((button) => button.addEventListener("click", async () => {
+    const user = state.users.find((item) => item.id === button.dataset.toggleUserRole);
+    await runAction(() => updateDoc(doc(db, "users", user.id), stamp({ role: user.role === "admin" ? "basic" : "admin" })));
   }));
 }
 

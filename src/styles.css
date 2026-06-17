@@ -442,6 +442,12 @@ td small {
   padding: 0 12px;
 }
 
+.actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .icon-button {
   width: 36px;
   padding: 0;

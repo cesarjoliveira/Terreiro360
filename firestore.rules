@@ -17,12 +17,21 @@ service cloud.firestore {
         && get(userPath(request.auth.uid)).data.status == "active";
     }
 
-    function bootstrapAllowed() {
+    function createsOwnBasicUser(userId) {
       return signedIn()
-        && exists(/databases/$(database)/documents/config/bootstrap)
-        && get(/databases/$(database)/documents/config/bootstrap).data.enabled == true
-        && request.resource.data.bootstrapCode == get(/databases/$(database)/documents/config/bootstrap).data.code
-        && request.resource.data.role == "admin";
+        && request.auth.uid == userId
+        && request.resource.data.role == "basic"
+        && request.resource.data.status == "active"
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.keys().hasOnly([
+          "displayName",
+          "email",
+          "phone",
+          "role",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]);
     }
 
     function ownsChild(childId) {
@@ -37,7 +46,7 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isAdmin() || (signedIn() && request.auth.uid == userId);
-      allow create: if isAdmin() || (signedIn() && request.auth.uid == userId && bootstrapAllowed());
+      allow create: if isAdmin() || createsOwnBasicUser(userId);
       allow update: if isAdmin() || (
         signedIn()
         && request.auth.uid == userId
