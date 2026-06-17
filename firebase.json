@@ -4,12 +4,19 @@
     "ignore": [
       "firebase.json",
       "**/.*",
+      "**/.*/**",
       "**/node_modules/**",
       "docs/**",
       "scripts/**",
       "server.js",
       "package.json",
-      "package-lock.json"
+      "package-lock.json",
+      "README.md",
+      "firestore.rules",
+      "firestore.indexes.json",
+      "firebase-debug.log",
+      "firestore-debug.log",
+      "ui-debug.log"
     ],
     "cleanUrls": true,
     "rewrites": [
